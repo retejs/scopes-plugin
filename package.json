@@ -12,7 +12,7 @@
     "lint": "rete lint"
   },
   "author": "Vitaliy Stoliarov",
-  "license": "MIT",
+  "license": "CC-BY-NC-SA-4.0",
   "peerDependencies": {
     "rete": "*"
   },
