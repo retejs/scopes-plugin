@@ -7,6 +7,7 @@ export type NodeScheme = NodeBase & {
   width: number
   height: number
   parent?: NodeId
+  selected?: boolean
 }
 
 export type BaseSchemes = GetSchemes<NodeScheme, ConnectionBase>
@@ -21,6 +22,8 @@ export class ScopesPlugin<Schemes extends BaseSchemes, T> extends Scope<never, A
             bottom: 20
         }
         let lockTranslateFor: string[] = []
+        let picked: { id: string, time: number, timeout: number } | null = null
+        let extractCandidates: string[] = []
 
         function connectionToTop(id: string) {
             const view = props.area.connectionViews.get(id)
@@ -106,16 +109,68 @@ export class ScopesPlugin<Schemes extends BaseSchemes, T> extends Scope<never, A
                     props.area.area.element.prepend(view)
                 }
             }
+
+            function updateNodeSizes(node: Schemes['Node'], width: number, height: number) {
+                node.width = width
+                node.height = height
+
+                const view = props.area.nodeViews.get(node.id)
+
+                if (!view) throw new Error('cannot find parent node view')
+
+                const item = view.element.children.item(0) as HTMLElement
+
+                if (item) {
+                    item.style.width = `${width}px` // TODO create interface and keep performance
+                    item.style.height = `${height}px`
+                }
+            }
+
+            // eslint-disable-next-line max-statements
+            async function resizeParent(parent: Schemes['Node']) {
+                const children = props.editor.getNodes().filter(child => child.parent === parent.id)
+
+                if (children.length === 0) {
+                    updateNodeSizes(parent, 220, 120)
+                    if (parent.parent) {
+                        const parentsParent = props.editor.getNode(parent.parent)
+
+                        if (parentsParent) {
+                            await resizeParent(parentsParent)
+                        }
+                    }
+                    return
+                }
+
+                const { top, left, width, height } = getNodesBBox(children)
+
+                const outerWidth = width + padding.left + padding.right
+                const outerHeight = height + padding.top + padding.bottom
+                const outerTop = top - padding.top
+                const outerLeft = left - padding.left
+
+                const view = props.area.nodeViews.get(parent.id)
+
+                if (!view) throw new Error('cannot find parent node view')
+
+                updateNodeSizes(parent, outerWidth, outerHeight)
+                lockTranslateFor.push(parent.id)
+                await view.translate(outerLeft, outerTop)
+                lockTranslateFor = lockTranslateFor.filter(p => p !== parent.id)
+
+            }
+
             if (context.type === 'nodetranslated') {
+                const { id } = context.data
                 const nodes = props.editor.getNodes()
-                const current = nodes.find(n => n.id === context.data.id)
+                const current = nodes.find(n => n.id === id)
 
                 if (!current) throw new Error('cannot find node')
 
                 //// move children
 
-                if (!lockTranslateFor.includes(context.data.id)) {
-                    const children = nodes.filter(n => n.parent === context.data.id)
+                if (!lockTranslateFor.includes(id)) {
+                    const children = nodes.filter(n => n.parent === id)
 
                     await Promise.all(children.map(async n => {
                         const dx = context.data.position.x - context.data.previous.x
@@ -135,32 +190,8 @@ export class ScopesPlugin<Schemes extends BaseSchemes, T> extends Scope<never, A
 
                 const parent = nodes.find(n => n.id === current.parent)
 
-                if (parent) {
-                    const parentChildren = nodes.filter(child => child.parent === parent.id)
-                    const { top, left, width, height } = getNodesBBox(parentChildren)
-
-                    const outerWidth = width + padding.left + padding.right
-                    const outerHeight = height + padding.top + padding.bottom
-                    const outerTop = top - padding.top
-                    const outerLeft = left - padding.left
-
-                    parent.width = outerWidth
-                    parent.height = outerHeight
-
-                    const view = props.area.nodeViews.get(parent.id)
-
-                    if (view) {
-                        const i = view.element.children.item(0) as HTMLElement
-
-                        if (i) {
-                            i.style.width = `${outerWidth}px`
-                            i.style.height = `${outerHeight}px`
-
-                            lockTranslateFor.push(parent.id)
-                            await view.translate(outerLeft, outerTop)
-                            lockTranslateFor = lockTranslateFor.filter(p => p !== parent.id)
-                        }
-                    }
+                if (parent && !extractCandidates.includes(id)) {
+                    await resizeParent(parent)
                 }
             }
             if (context.type === 'connectioncreated') {
@@ -170,6 +201,88 @@ export class ScopesPlugin<Schemes extends BaseSchemes, T> extends Scope<never, A
                 if (connection) {
                     toTop(connection.source)
                     toTop(connection.target)
+                }
+            }
+            if (context.type === 'nodepicked') {
+                const { id } = context.data
+
+                picked = { id, time: Date.now(), timeout: window.setTimeout(() => {
+                    const selected = props.editor.getNodes().filter(n => n.selected)
+                    const targets = selected.length ? selected.map(n => n.id) : [id]
+
+                    extractCandidates.push(...targets)
+                }, 500) }
+            }
+
+            if (context.type === 'nodetranslated') {
+                if (picked) {
+                    window.clearTimeout(picked.timeout)
+                    picked = null
+                }
+            }
+
+            // eslint-disable-next-line max-statements
+            async function reassignParent(ids: NodeId[], pointer: { x: number, y: number }) {
+                const nodes = ids
+                    .map(id => props.editor.getNode(id))
+                    .filter((n): n is Schemes['Node'] => Boolean(n))
+
+                const overlayNodes = props.editor.getNodes()
+                    .map(node => {
+                        const view = props.area.nodeViews.get(node.id)
+
+                        if (!view) throw new Error('node view')
+
+                        return { node, view }
+                    }).filter(({ node, view }) => {
+                        return !ids.includes(node.id)
+                            && pointer.x > view.position.x
+                            && pointer.y > view.position.y
+                            && pointer.x < view.position.x + node.width
+                            && pointer.y < view.position.y + node.height
+                    })
+                const areaElements = Array.from(props.area.area.element.childNodes)
+                const overlayNodesWithIndex = overlayNodes.map(({ node, view }) => {
+                    const index = areaElements.indexOf(view.element)
+
+                    return { node, view, index }
+                })
+
+                overlayNodesWithIndex.sort((a, b) => b.index - a.index)
+                const topOverlayParent = overlayNodesWithIndex[0]
+
+                const formerParents = nodes
+                    .map(node => node.parent)
+                    .filter((id): id is string => Boolean(id))
+                    .map(id => {
+                        const node = props.editor.getNode(id)
+
+                        if (!node) throw new Error('node')
+
+                        return node
+                    })
+
+                // eslint-disable-next-line no-undefined
+                nodes.forEach(node => node.parent = undefined)
+                if (topOverlayParent) {
+                    console.log(topOverlayParent.view.element)
+                    nodes.forEach(node => node.parent = topOverlayParent.node.id)
+                    await resizeParent(topOverlayParent.node)
+                }
+
+                for (const formerParent of formerParents) {
+                    await resizeParent(formerParent)
+                }
+            }
+
+            if (context.type === 'nodedragged') {
+                if (picked) {
+                    window.clearTimeout(picked.timeout)
+                    picked = null
+                }
+                if (extractCandidates.length) {
+                    await reassignParent([...extractCandidates], props.area.area.pointer)
+                    extractCandidates = []
                 }
             }
 
