@@ -6,7 +6,7 @@ import { ExpectedScheme } from '../types'
 type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }
 
 export function moveBetweenScopes<T>(props: Props<T>) {
-    let picked: { id: string, time: number, timeout: number } | null = null
+    let picked: { timeout: number } | null = null
     let candidates: string[] = []
 
     function getPicked() {
@@ -21,12 +21,14 @@ export function moveBetweenScopes<T>(props: Props<T>) {
 
     return {
         pick(id: NodeId) {
-            picked = { id, time: Date.now(), timeout: window.setTimeout(() => {
+            const timeout = window.setTimeout(() => {
                 const selected = props.editor.getNodes().filter(n => n.selected)
                 const targets = selected.length ? selected.map(n => n.id) : [id]
 
                 candidates.push(...targets)
-            }, 250) }
+            }, 250)
+
+            picked = { timeout }
         },
         release() {
             const list = getPicked()
