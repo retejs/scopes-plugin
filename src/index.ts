@@ -6,7 +6,7 @@ import { useOrdering } from './ordering'
 import { reassignParent, translateChildren } from './scope'
 import { resizeParent } from './sizing'
 import { ExpectedScheme, Padding } from './types'
-import { belongsTo, trackedTranslate } from './utils'
+import { belongsTo, hasSelectedParent, trackedTranslate } from './utils'
 import { useValidator } from './validation'
 
 type Props<Schemes extends ExpectedScheme, T> = {
@@ -46,8 +46,13 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T> extends Scope<never
 
                 const parent = current.parent ? props.editor.getNode(current.parent) : null
 
-                if (parent && !parent.selected && !belongsTo(id, getPicked(), props)) {
-                    await resizeParent(parent, padding, translate, props)
+                if (parent) {
+                    const hasAnySelectedParent = hasSelectedParent(id, props)
+                    const isPicked = belongsTo(id, getPicked(), props)
+
+                    if (!parent.selected && !hasAnySelectedParent && !isPicked) {
+                        await resizeParent(parent, padding, translate, props)
+                    }
                 }
             }
             if (context.type === 'nodepicked') {

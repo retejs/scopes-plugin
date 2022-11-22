@@ -15,6 +15,22 @@ export function belongsTo<T>(nodeId: NodeId, ids: NodeId[], props: Props<T>) {
     if (belongsTo(node.parent, ids, props)) return true
 }
 
+export function hasSelectedParent<T>(nodeId: NodeId, props: Props<T>): boolean {
+    const node = props.editor.getNode(nodeId)
+
+    if (!node) throw new Error('node')
+
+    if (!node.parent) return false
+
+    const parent = props.editor.getNode(node.parent)
+
+    if (!parent) throw new Error('node')
+
+    if (parent.selected) return true
+
+    return hasSelectedParent(node.parent, props)
+}
+
 export type Translate = (nodeId: string, x: number, y: number) => Promise<void>
 
 /**
