@@ -32,9 +32,13 @@ export function trackedTranslate<T>(props: Props<T>): {
 
             if (!view) throw new Error('cannot find parent node view')
 
-            lockTranslateFor.push(id)
-            await view.translate(x, y)
-            lockTranslateFor = lockTranslateFor.filter(p => p !== id)
+            const previous = view.position
+
+            if (previous.x !== x || previous.y !== y) {
+                lockTranslateFor.push(id)
+                await view.translate(x, y)
+                lockTranslateFor = lockTranslateFor.filter(p => p !== id)
+            }
         },
         isTranslating(id) {
             return lockTranslateFor.includes(id)
