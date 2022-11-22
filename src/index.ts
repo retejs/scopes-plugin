@@ -38,7 +38,6 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T> extends Scope<never
                 const current = props.editor.getNode(id)
 
                 if (!current) throw new Error('cannot find node')
-
                 // prevent translating children if the node translation
                 // is triggered by its resizing (when its children moved)
                 if (!isTranslating(id)) {
@@ -47,7 +46,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T> extends Scope<never
 
                 const parent = current.parent ? props.editor.getNode(current.parent) : null
 
-                if (parent && !belongsTo(id, getPicked(), props)) {
+                if (parent && !parent.selected && !belongsTo(id, getPicked(), props)) {
                     await resizeParent(parent, padding, translate, props)
                 }
             }
