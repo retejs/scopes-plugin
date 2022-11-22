@@ -70,8 +70,9 @@ export async function translateChildren<T>(id: NodeId, { position, previous }: {
         const dy = position.y - previous.y
 
         const view = props.area.nodeViews.get(n.id)
+        const node = props.editor.getNode(n.id)
 
-        if (view) {
+        if (view && node && !node.selected) {
             const nodePosition = view.position
 
             await view.translate(nodePosition.x + dx, nodePosition.y + dy)
