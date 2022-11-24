@@ -15,3 +15,5 @@ export type NodeScheme = NodeBase & {
 }
 
 export type ExpectedScheme = GetSchemes<NodeScheme, ConnectionBase>
+
+export type Position = { x: number, y: number }
