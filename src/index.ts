@@ -1,5 +1,5 @@
-import { BaseSchemes, NodeEditor, NodeId, Scope } from 'rete'
-import { Area2DInherited, AreaPlugin } from 'rete-area-plugin'
+import { BaseSchemes, NodeEditor, NodeId, Root, Scope } from 'rete'
+import { Area2D, Area2DInherited, AreaPlugin } from 'rete-area-plugin'
 
 import { classic } from './agents'
 import { ScopeAgent } from './agents/types'
@@ -10,9 +10,7 @@ import { ExpectedScheme, Padding } from './types'
 import { belongsTo, hasSelectedParent, trackedTranslate } from './utils'
 import { useValidator } from './validation'
 
-type Props<Schemes extends ExpectedScheme, T> = {
-    area: AreaPlugin<Schemes, T>
-    editor: NodeEditor<Schemes>
+type Props = {
     padding?: Padding
     agent?: ScopeAgent
 }
@@ -21,24 +19,35 @@ export type Scopes =
     | { type: 'scopepicked', data: { ids: NodeId[] } }
     | { type: 'scopereleased', data: { ids: NodeId[] } }
 
-export class ScopesPlugin<Schemes extends ExpectedScheme, T> extends Scope<Scopes, Area2DInherited<Schemes>> {
-    // eslint-disable-next-line max-statements
-    constructor(props: Props<Schemes, T>) {
+export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Scope<Scopes, Area2DInherited<Schemes>> {
+    padding: Padding
+
+    constructor(private props?: Props) {
         super('scopes')
-        const padding: Padding = props.padding || {
+        this.padding = props?.padding || {
             top: 40,
             left: 20,
             right: 20,
             bottom: 20
         }
+    }
+
+    // eslint-disable-next-line max-statements
+    setParent(scope: Scope<Area2D<Schemes>, [Root<Schemes>]>): void {
+        super.setParent(scope)
+
+        const area = this.parentScope<AreaPlugin<Schemes, T>>(AreaPlugin)
+        const editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor)
+        const props = { editor, area }
+        const { padding } = this
         const pickedNodes = getPickedNodes(this)
         const { translate, isTranslating } = trackedTranslate(props)
 
         useValidator(props)
         useOrdering(props)
 
-        if (props.agent) {
-            props.agent({ padding, translate }, { ...props, scopes: this })
+        if (this.props?.agent) {
+            this.props.agent({ padding, translate }, { ...props, scopes: this })
         } else {
             classic.useScopeAgent({ padding, translate }, { ...props, scopes: this })
             classic.useVisualEffects({ ...props, scopes: this })
