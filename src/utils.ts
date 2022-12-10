@@ -40,7 +40,9 @@ export function trackedTranslate<T>(props: Props<T>): {
     translate: Translate,
     isTranslating: (id: NodeId) => boolean
 } {
-    let lockTranslateFor: NodeId[] = []
+    const active = new Map<NodeId, number>()
+    const increment = (id: NodeId) => active.set(id, (active.get(id) || 0) + 1)
+    const decrement = (id: NodeId) => active.set(id, (active.get(id) || 0) - 1)
 
     return {
         async translate(id, x, y) {
@@ -51,13 +53,13 @@ export function trackedTranslate<T>(props: Props<T>): {
             const previous = view.position
 
             if (previous.x !== x || previous.y !== y) {
-                lockTranslateFor.push(id)
+                increment(id)
                 await view.translate(x, y)
-                lockTranslateFor = lockTranslateFor.filter(p => p !== id)
+                decrement(id)
             }
         },
         isTranslating(id) {
-            return lockTranslateFor.includes(id)
+            return (active.get(id) || 0) > 0
         }
     }
 }
