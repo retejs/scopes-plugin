@@ -77,6 +77,14 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
                     }
                 }
             }
+            if (context.type === 'noderemoved') {
+                const parentId = context.data.parent
+                const parent = parentId && props.editor.getNode(parentId)
+
+                if (parent) {
+                    await resizeParent(parent, padding, translate, props)
+                }
+            }
             return context
         })
     }
