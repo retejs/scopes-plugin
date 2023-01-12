@@ -21,6 +21,8 @@ export type Scopes =
 
 export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Scope<Scopes, Area2DInherited<Schemes>> {
     padding: Padding
+    editor!: NodeEditor<Schemes>
+    area!: AreaPlugin<Schemes, T>
 
     constructor(private props?: Props) {
         super('scopes')
@@ -36,9 +38,10 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     setParent(scope: Scope<Area2D<Schemes>, [Root<Schemes>]>): void {
         super.setParent(scope)
 
-        const area = this.parentScope<AreaPlugin<Schemes, T>>(AreaPlugin)
-        const editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor)
-        const props = { editor, area }
+        this.area = this.parentScope<AreaPlugin<Schemes, T>>(AreaPlugin)
+        this.editor = this.area.parentScope<NodeEditor<Schemes>>(NodeEditor)
+
+        const props = { editor: this.editor, area: this.area }
         const { padding } = this
         const pickedNodes = getPickedNodes(this)
         const { translate, isTranslating } = trackedTranslate(props)
