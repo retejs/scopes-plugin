@@ -79,8 +79,8 @@ export async function resizeParent<T>(parent: ExpectedScheme['Node'], padding: P
     if (parent.parent) {
         const parentsParent = props.editor.getNode(parent.parent)
 
-        if (!parentsParent) throw new Error('cannot find parent node')
-
-        await resizeParent(parentsParent, padding, translate, props)
+        if (parentsParent) {
+            await resizeParent(parentsParent, padding, translate, props)
+        }
     }
 }
