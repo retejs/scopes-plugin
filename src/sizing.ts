@@ -49,8 +49,9 @@ export function updateNodeSizes<T>(node: ExpectedScheme['Node'], size: Size, { a
     const item = view.element.children.item(0) as HTMLElement
 
     if (item) {
-        item.style.width = `${size.width}px` // TODO create interface and keep performance
-        item.style.height = `${size.height}px`
+        item.style.width = `${width}px` // TODO create interface and keep performance
+        item.style.height = `${height}px`
+        area.emit({ type: 'noderesized', data: { id: node.id, size: { width, height }, previous } })
     }
 }
 
