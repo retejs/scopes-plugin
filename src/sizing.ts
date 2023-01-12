@@ -7,15 +7,15 @@ import { Translate } from './utils'
 type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }
 
 export function getNodesBoundingBox<T>(nodes: ExpectedScheme['Node'][], { area }: Props<T>) {
-    const boxes = nodes.map(c => {
-        const view = area.nodeViews.get(c.id)
+    const boxes = nodes.map(node => {
+        const view = area.nodeViews.get(node.id)
 
         if (!view) throw new Error('view')
 
         return {
             position: view.position,
-            width: c.width,
-            height: c.height
+            width: node.width,
+            height: node.height
         }
     })
 
@@ -38,9 +38,13 @@ export function getNodesBoundingBox<T>(nodes: ExpectedScheme['Node'][], { area }
 
 type Size = { width: number, height: number }
 
+// eslint-disable-next-line max-statements
 export function updateNodeSizes<T>(node: ExpectedScheme['Node'], size: Size, { area }: Props<T>) {
-    node.width = size.width
-    node.height = size.height
+    const { width, height } = size
+    const previous = { width: node.width, height: node.height }
+
+    node.width = width
+    node.height = height
 
     const view = area.nodeViews.get(node.id)
 
