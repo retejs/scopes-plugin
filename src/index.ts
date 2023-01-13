@@ -73,9 +73,9 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
 
                 if (parent) {
                     const hasAnySelectedParent = hasSelectedParent(id, props)
-                    const isPicked = belongsTo(id, pickedNodes, props)
+                    const isPicked = belongsTo(current.id, pickedNodes, props)
 
-                    if (!parent.selected && !hasAnySelectedParent && !isPicked) {
+                    if (!hasAnySelectedParent && !isPicked) {
                         await resizeParent(parent, padding, translate, props)
                     }
                 }
@@ -90,6 +90,13 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
             }
             return context
         })
+    }
+
+    isDependent(id: NodeId) {
+        const props = { editor: this.editor, area: this.area }
+        const node = this.editor.getNode(id)
+
+        return node && (node.selected || hasSelectedParent(id, props))
     }
 }
 
