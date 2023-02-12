@@ -1,10 +1,7 @@
 {
   "name": "rete-scopes-plugin",
-  "version": "0.1.0",
+  "version": "2.0.0-beta.1",
   "description": "",
-  "main": "build/scopes-plugin.common.js",
-  "module": "build/scopes-plugin.esm.js",
-  "types": "types",
   "scripts": {
     "build": "rete build -c rete.config.ts",
     "build:dev": "rete build -c rete.config.ts --watch",
@@ -17,9 +14,9 @@
     "rete": "*"
   },
   "devDependencies": {
-    "rete": "file:../rete/rete-2.0.0-beta.1.tgz",
-    "rete-area-plugin": "file:../area-plugin/rete-area-plugin-0.2.1.tgz",
-    "rete-cli": "1.0.0-beta.13",
+    "rete": "file:../rete/dist/package.tgz",
+    "rete-area-plugin": "file:../area-plugin/dist/package.tgz",
+    "rete-cli": "^1.0.0-beta.18",
     "typescript": "4.8.4"
   }
 }
