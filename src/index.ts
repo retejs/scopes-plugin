@@ -20,98 +20,98 @@ export type Scopes =
     | { type: 'scopereleased', data: { ids: NodeId[] } }
 
 export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Scope<Scopes, Area2DInherited<Schemes>> {
-    padding: Padding
-    editor!: NodeEditor<Schemes>
-    area!: AreaPlugin<Schemes, T>
+  padding: Padding
+  editor!: NodeEditor<Schemes>
+  area!: AreaPlugin<Schemes, T>
 
-    constructor(private props?: Props) {
-        super('scopes')
-        this.padding = props?.padding || {
-            top: 40,
-            left: 20,
-            right: 20,
-            bottom: 20
+  constructor(private props?: Props) {
+    super('scopes')
+    this.padding = props?.padding || {
+      top: 40,
+      left: 20,
+      right: 20,
+      bottom: 20
+    }
+  }
+
+  // eslint-disable-next-line max-statements
+  setParent(scope: Scope<Area2D<Schemes>, [Root<Schemes>]>): void {
+    super.setParent(scope)
+
+    this.area = this.parentScope<AreaPlugin<Schemes, T>>(AreaPlugin)
+    this.editor = this.area.parentScope<NodeEditor<Schemes>>(NodeEditor)
+
+    const props = { editor: this.editor, area: this.area }
+    const { padding } = this
+    const pickedNodes = getPickedNodes(this)
+    const { translate, isTranslating } = trackedTranslate(props)
+
+    useValidator(props)
+    useOrdering(props)
+
+    if (this.props?.agent) {
+      this.props.agent({ padding, translate }, { ...props, scopes: this })
+    } else {
+      classic.useScopeAgent({ padding, translate }, { ...props, scopes: this })
+      classic.useVisualEffects({ ...props, scopes: this })
+    }
+
+    // eslint-disable-next-line max-statements, complexity
+    this.addPipe(async context => {
+      if (context.type === 'nodetranslated') {
+        const { id } = context.data
+        const current = props.editor.getNode(id)
+
+        if (!current) throw new Error('cannot find node')
+        // prevent translating children if the node translation
+        // is triggered by its resizing (when its children moved)
+        if (!isTranslating(id)) {
+          await translateChildren(id, context.data, props)
         }
-    }
 
-    // eslint-disable-next-line max-statements
-    setParent(scope: Scope<Area2D<Schemes>, [Root<Schemes>]>): void {
-        super.setParent(scope)
+        const parent = current.parent ? props.editor.getNode(current.parent) : null
 
-        this.area = this.parentScope<AreaPlugin<Schemes, T>>(AreaPlugin)
-        this.editor = this.area.parentScope<NodeEditor<Schemes>>(NodeEditor)
+        if (parent) {
+          const hasAnySelectedParent = hasSelectedParent(id, props)
+          const isPicked = belongsTo(current.id, pickedNodes, props)
 
-        const props = { editor: this.editor, area: this.area }
-        const { padding } = this
-        const pickedNodes = getPickedNodes(this)
-        const { translate, isTranslating } = trackedTranslate(props)
-
-        useValidator(props)
-        useOrdering(props)
-
-        if (this.props?.agent) {
-            this.props.agent({ padding, translate }, { ...props, scopes: this })
-        } else {
-            classic.useScopeAgent({ padding, translate }, { ...props, scopes: this })
-            classic.useVisualEffects({ ...props, scopes: this })
+          if (!hasAnySelectedParent && !isPicked) {
+            await resizeParent(parent, padding, translate, props)
+          }
         }
+      }
+      if (context.type === 'noderemoved') {
+        const parentId = context.data.parent
+        const parent = parentId && props.editor.getNode(parentId)
 
-        // eslint-disable-next-line max-statements
-        this.addPipe(async context => {
-            if (context.type === 'nodetranslated') {
-                const { id } = context.data
-                const current = props.editor.getNode(id)
+        if (parent) {
+          await resizeParent(parent, padding, translate, props)
+        }
+      }
+      return context
+    })
+  }
 
-                if (!current) throw new Error('cannot find node')
-                // prevent translating children if the node translation
-                // is triggered by its resizing (when its children moved)
-                if (!isTranslating(id)) {
-                    await translateChildren(id, context.data, props)
-                }
+  isDependent(id: NodeId) {
+    const props = { editor: this.editor, area: this.area }
+    const node = this.editor.getNode(id)
 
-                const parent = current.parent ? props.editor.getNode(current.parent) : null
-
-                if (parent) {
-                    const hasAnySelectedParent = hasSelectedParent(id, props)
-                    const isPicked = belongsTo(current.id, pickedNodes, props)
-
-                    if (!hasAnySelectedParent && !isPicked) {
-                        await resizeParent(parent, padding, translate, props)
-                    }
-                }
-            }
-            if (context.type === 'noderemoved') {
-                const parentId = context.data.parent
-                const parent = parentId && props.editor.getNode(parentId)
-
-                if (parent) {
-                    await resizeParent(parent, padding, translate, props)
-                }
-            }
-            return context
-        })
-    }
-
-    isDependent(id: NodeId) {
-        const props = { editor: this.editor, area: this.area }
-        const node = this.editor.getNode(id)
-
-        return node && (node.selected || hasSelectedParent(id, props))
-    }
+    return node && (node.selected || hasSelectedParent(id, props))
+  }
 }
 
 export function getPickedNodes(scopes: Scope<Scopes, Area2DInherited<BaseSchemes>>) {
-    const nodes: NodeId[] = []
+  const nodes: NodeId[] = []
 
-    scopes.addPipe(async context => {
-        if (!('type' in context)) return context
-        if (context.type === 'scopepicked') {
-            nodes.push(...context.data.ids)
-        }
-        if (context.type === 'scopereleased') {
-            nodes.splice(0, nodes.length, ...nodes.filter(id => !context.data.ids.includes(id)))
-        }
-        return context
-    })
-    return nodes
+  scopes.addPipe(async context => {
+    if (!('type' in context)) return context
+    if (context.type === 'scopepicked') {
+      nodes.push(...context.data.ids)
+    }
+    if (context.type === 'scopereleased') {
+      nodes.splice(0, nodes.length, ...nodes.filter(id => !context.data.ids.includes(id)))
+    }
+    return context
+  })
+  return nodes
 }
