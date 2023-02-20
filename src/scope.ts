@@ -1,9 +1,8 @@
 import { NodeEditor, NodeId } from 'rete'
 import { AreaPlugin } from 'rete-area-plugin'
-import { Position } from 'rete-area-plugin/types/next/types'
 
 import { resizeParent } from './sizing'
-import { ExpectedScheme, Padding } from './types'
+import { ExpectedScheme, Padding, Position } from './types'
 import { Translate } from './utils'
 
 type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }

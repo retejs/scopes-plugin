@@ -9,7 +9,7 @@ function bringConnectionForward<T>(id: ConnectionId, props: Props<T>) {
   const view = props.area.connectionViews.get(id)
 
   if (view) {
-    props.area.area.appendChild(view)
+    props.area.area.appendChild(view.element)
   }
 }
 
@@ -17,7 +17,7 @@ function bringConnectionBack<T>(id: ConnectionId, props: Props<T>) {
   const view = props.area.connectionViews.get(id)
 
   if (view) {
-    props.area.area.element.prepend(view)
+    props.area.area.element.prepend(view.element)
   }
 }
 

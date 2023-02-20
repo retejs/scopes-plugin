@@ -38,25 +38,13 @@ export function getNodesBoundingBox<T>(nodes: ExpectedScheme['Node'][], { area }
 
 type Size = { width: number, height: number }
 
-// eslint-disable-next-line max-statements
 export function updateNodeSizes<T>(node: ExpectedScheme['Node'], size: Size, { area }: Props<T>) {
   const { width, height } = size
-  const previous = { width: node.width, height: node.height }
 
   node.width = width
   node.height = height
 
-  const view = area.nodeViews.get(node.id)
-
-  if (!view) throw new Error('cannot find parent node view')
-
-  const item = view.element.children.item(0) as HTMLElement
-
-  if (item) {
-    item.style.width = `${width}px` // TODO create interface and keep performance
-    item.style.height = `${height}px`
-    area.emit({ type: 'noderesized', data: { id: node.id, size: { width, height }, previous } })
-  }
+  area.resize(node.id, width, height)
 }
 
 // eslint-disable-next-line max-statements
