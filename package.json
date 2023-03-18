@@ -9,12 +9,13 @@
   "author": "Vitaliy Stoliarov",
   "license": "CC-BY-NC-SA-4.0",
   "peerDependencies": {
-    "rete": "*"
+    "rete": "*",
+    "rete-area-plugin": "^2.0.0-beta.1"
   },
   "devDependencies": {
-    "rete": "file:../rete/dist/package.tgz",
-    "rete-area-plugin": "file:../area-plugin/dist/package.tgz",
-    "rete-cli": "^1.0.0-beta.24",
+    "rete": "^2.0.0-beta.1",
+    "rete-area-plugin": "^2.0.0-beta.1",
+    "rete-cli": "^1.0.0-beta.25",
     "typescript": "4.8.4"
   }
 }

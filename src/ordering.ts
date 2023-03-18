@@ -9,15 +9,16 @@ function bringConnectionForward<T>(id: ConnectionId, props: Props<T>) {
   const view = props.area.connectionViews.get(id)
 
   if (view) {
-    props.area.area.appendChild(view.element)
+    props.area.area.content.reorder(view.element, null)
   }
 }
 
 function bringConnectionBack<T>(id: ConnectionId, props: Props<T>) {
   const view = props.area.connectionViews.get(id)
+  const { content } = props.area.area
 
   if (view) {
-    props.area.area.element.prepend(view.element)
+    content.reorder(view.element, content.holder.firstChild)
   }
 }
 
@@ -25,7 +26,7 @@ function bringForward<T>(nodeId: NodeId, props: Props<T>) {
   const view = props.area.nodeViews.get(nodeId)
 
   if (view) {
-    props.area.area.appendChild(view.element)
+    props.area.area.content.reorder(view.element, null)
   }
 
   const connections = props.editor.getConnections().filter(c => {

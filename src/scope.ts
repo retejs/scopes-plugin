@@ -28,7 +28,7 @@ export async function reassignParent<T>(ids: NodeId[], pointer: { x: number, y: 
                 && pointer.x < view.position.x + node.width
                 && pointer.y < view.position.y + node.height
     })
-  const areaElements = Array.from(props.area.area.element.childNodes)
+  const areaElements = Array.from(props.area.area.content.holder.childNodes)
   const overlayNodesWithIndex = overlayNodes.map(({ node, view }) => {
     const index = areaElements.indexOf(view.element)
 
