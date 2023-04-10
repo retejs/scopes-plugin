@@ -98,7 +98,7 @@ export function useVisualEffects<T>({ area, editor, scopes }: AgentContext<T>): 
       const first = nonSelected[0]
 
       if (first) {
-        first.view.element.style.opacity = ''
+        first.view.element.style.opacity = '0.8'
         previousHighlighted = first.node.id
       }
     }
