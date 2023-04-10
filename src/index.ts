@@ -1,18 +1,18 @@
 import { BaseSchemes, NodeEditor, NodeId, Root, Scope } from 'rete'
 import { Area2D, Area2DInherited, AreaPlugin } from 'rete-area-plugin'
 
-import { classic } from './agents'
-import { ScopeAgent } from './agents/types'
 import { useOrdering } from './ordering'
+import { Preset } from './presets/types'
 import { translateChildren } from './scope'
 import { resizeParent } from './sizing'
 import { ExpectedScheme, Padding } from './types'
 import { belongsTo, hasSelectedParent, trackedTranslate } from './utils'
 import { useValidator } from './validation'
 
+export * as Presets from './presets'
+
 type Props = {
-    padding?: Padding
-    agent?: ScopeAgent
+  padding?: Padding
 }
 
 export type Scopes =
@@ -23,6 +23,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
   padding: Padding
   editor!: NodeEditor<Schemes>
   area!: AreaPlugin<Schemes, T>
+  presets: Preset[] = []
 
   constructor(private props?: Props) {
     super('scopes')
@@ -49,12 +50,9 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     useValidator(props)
     useOrdering(props)
 
-    if (this.props?.agent) {
-      this.props.agent({ padding, translate }, { ...props, scopes: this })
-    } else {
-      classic.useScopeAgent({ padding, translate }, { ...props, scopes: this })
-      classic.useVisualEffects({ ...props, scopes: this })
-    }
+    this.presets.forEach(preset => {
+      preset({ padding, translate }, { ...props, scopes: this })
+    })
 
     // eslint-disable-next-line max-statements, complexity
     this.addPipe(async context => {
@@ -92,7 +90,11 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     })
   }
 
-  isDependent(id: NodeId) {
+  public addPreset(preset: Preset) {
+    this.presets.push(preset)
+  }
+
+  public isDependent(id: NodeId) {
     const props = { editor: this.editor, area: this.area }
     const node = this.editor.getNode(id)
 
