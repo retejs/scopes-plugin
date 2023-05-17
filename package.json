@@ -1,6 +1,6 @@
 {
   "name": "rete-scopes-plugin",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0-beta.3",
   "description": "",
   "scripts": {
     "build": "rete build -c rete.config.ts",
@@ -29,8 +29,8 @@
     "rete-area-plugin": "^2.0.0-beta.1"
   },
   "devDependencies": {
-    "rete": "^2.0.0-beta.6",
-    "rete-area-plugin": "^2.0.0-beta.7",
+    "rete": "^2.0.0-beta.9",
+    "rete-area-plugin": "^2.0.0-beta.12",
     "rete-cli": "^1.0.0-beta.29",
     "typescript": "4.8.4"
   },
