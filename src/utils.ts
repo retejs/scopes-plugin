@@ -1,9 +1,9 @@
 import { BaseSchemes, NodeEditor, NodeId } from 'rete'
-import { AreaPlugin } from 'rete-area-plugin'
+import { BaseAreaPlugin } from 'rete-area-plugin'
 
 import { ExpectedScheme } from './types'
 
-type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }
+type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<ExpectedScheme, T> }
 
 export function belongsTo<T>(nodeId: NodeId, ids: NodeId[], props: Props<T>) {
   const node = props.editor.getNode(nodeId)
@@ -37,8 +37,8 @@ export type Translate = (nodeId: string, x: number, y: number) => Promise<void>
  * keep track of currently moving nodes (to prevent infinite loop)
  */
 export function trackedTranslate<T>(props: Props<T>): {
-    translate: Translate,
-    isTranslating: (id: NodeId) => boolean
+  translate: Translate,
+  isTranslating: (id: NodeId) => boolean
 } {
   const active = new Map<NodeId, number>()
   const increment = (id: NodeId) => active.set(id, (active.get(id) || 0) + 1)

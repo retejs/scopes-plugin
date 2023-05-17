@@ -1,5 +1,5 @@
-import { BaseSchemes, NodeEditor, Scope } from 'rete'
-import { Area2DInherited, AreaPlugin } from 'rete-area-plugin'
+import { NodeEditor, Root, Scope } from 'rete'
+import { BaseArea, BaseAreaPlugin } from 'rete-area-plugin'
 
 import { Scopes } from '..'
 import { ExpectedScheme, Padding } from '../types'
@@ -7,8 +7,8 @@ import { Translate } from '../utils'
 
 export type AgentContext<T> = {
   editor: NodeEditor<ExpectedScheme>
-  area: AreaPlugin<ExpectedScheme, T>
-  scopes: Scope<Scopes, Area2DInherited<BaseSchemes>>
+  area: BaseAreaPlugin<ExpectedScheme, BaseArea<ExpectedScheme> | T>
+  scopes: Scope<Scopes, [BaseArea<ExpectedScheme>, Root<ExpectedScheme>]>
 }
 export type AgentParams = { padding: Padding, translate: Translate }
 

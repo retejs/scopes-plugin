@@ -1,10 +1,10 @@
 import { NodeEditor } from 'rete'
-import { AreaPlugin } from 'rete-area-plugin'
+import { BaseAreaPlugin } from 'rete-area-plugin'
 
 import { ExpectedScheme } from './types'
 import { watchClearing } from './utils'
 
-type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }
+type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<ExpectedScheme, T> }
 
 export function useValidator<T>(props: Props<T>) {
   const isClearing = watchClearing(props.editor)

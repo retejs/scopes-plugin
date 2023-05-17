@@ -1,10 +1,10 @@
 import { NodeEditor } from 'rete'
-import { AreaPlugin } from 'rete-area-plugin'
+import { BaseAreaPlugin } from 'rete-area-plugin'
 
 import { ExpectedScheme, Padding } from './types'
 import { Translate } from './utils'
 
-type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }
+type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<ExpectedScheme, T> }
 
 export function getNodesBoundingBox<T>(nodes: ExpectedScheme['Node'][], { area }: Props<T>) {
   const boxes = nodes.map(node => {

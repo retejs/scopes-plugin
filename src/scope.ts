@@ -1,11 +1,11 @@
 import { NodeEditor, NodeId } from 'rete'
-import { AreaPlugin } from 'rete-area-plugin'
+import { BaseAreaPlugin } from 'rete-area-plugin'
 
 import { resizeParent } from './sizing'
 import { ExpectedScheme, Padding, Position } from './types'
 import { Translate } from './utils'
 
-type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }
+type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<ExpectedScheme, T> }
 
 // eslint-disable-next-line max-statements, max-len
 export async function reassignParent<T>(ids: NodeId[], pointer: { x: number, y: number }, padding: Padding, translate: Translate, props: Props<T>) {
@@ -23,10 +23,10 @@ export async function reassignParent<T>(ids: NodeId[], pointer: { x: number, y: 
       return { node, view }
     }).filter(({ node, view }) => {
       return !ids.includes(node.id)
-                && pointer.x > view.position.x
-                && pointer.y > view.position.y
-                && pointer.x < view.position.x + node.width
-                && pointer.y < view.position.y + node.height
+        && pointer.x > view.position.x
+        && pointer.y > view.position.y
+        && pointer.x < view.position.x + node.width
+        && pointer.y < view.position.y + node.height
     })
   const areaElements = Array.from(props.area.area.content.holder.childNodes)
   const overlayNodesWithIndex = overlayNodes.map(({ node, view }) => {

@@ -1,9 +1,9 @@
 import { ConnectionId, NodeEditor, NodeId } from 'rete'
-import { AreaPlugin } from 'rete-area-plugin'
+import { BaseArea, BaseAreaPlugin } from 'rete-area-plugin'
 
 import { ExpectedScheme } from './types'
 
-type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: AreaPlugin<ExpectedScheme, T> }
+type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<ExpectedScheme, BaseArea<ExpectedScheme> | T> }
 
 function bringConnectionForward<T>(id: ConnectionId, props: Props<T>) {
   const view = props.area.connectionViews.get(id)

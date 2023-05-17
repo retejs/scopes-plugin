@@ -1,5 +1,5 @@
-import { BaseSchemes, NodeEditor, NodeId, Root, Scope } from 'rete'
-import { Area2D, Area2DInherited, AreaPlugin } from 'rete-area-plugin'
+import { NodeEditor, NodeId, Root, Scope } from 'rete'
+import { BaseArea, BaseAreaPlugin } from 'rete-area-plugin'
 
 import { useOrdering } from './ordering'
 import { Preset } from './presets/types'
@@ -15,14 +15,17 @@ type Props = {
   padding?: Padding
 }
 
-export type Scopes =
-    | { type: 'scopepicked', data: { ids: NodeId[] } }
-    | { type: 'scopereleased', data: { ids: NodeId[] } }
+type Requires<Schemes extends ExpectedScheme> =
+  | BaseArea<Schemes>
 
-export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Scope<Scopes, Area2DInherited<Schemes>> {
+export type Scopes =
+  | { type: 'scopepicked', data: { ids: NodeId[] } }
+  | { type: 'scopereleased', data: { ids: NodeId[] } }
+
+export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Scope<Scopes, [Requires<Schemes>, Root<Schemes>]> {
   padding: Padding
   editor!: NodeEditor<Schemes>
-  area!: AreaPlugin<Schemes, T>
+  area!: BaseAreaPlugin<Schemes, T>
   presets: Preset[] = []
 
   constructor(private props?: Props) {
@@ -36,10 +39,10 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
   }
 
   // eslint-disable-next-line max-statements
-  setParent(scope: Scope<Area2D<Schemes>, [Root<Schemes>]>): void {
+  setParent(scope: Scope<BaseArea<Schemes>, [Root<Schemes>]>): void {
     super.setParent(scope)
 
-    this.area = this.parentScope<AreaPlugin<Schemes, T>>(AreaPlugin)
+    this.area = this.parentScope<BaseAreaPlugin<Schemes, T>>(BaseAreaPlugin)
     this.editor = this.area.parentScope<NodeEditor<Schemes>>(NodeEditor)
 
     const props = { editor: this.editor, area: this.area }
@@ -102,7 +105,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
   }
 }
 
-export function getPickedNodes(scopes: Scope<Scopes, Area2DInherited<BaseSchemes>>) {
+export function getPickedNodes<S extends ExpectedScheme>(scopes: Scope<Scopes, [Requires<S>, Root<S>]>) {
   const nodes: NodeId[] = []
 
   scopes.addPipe(async context => {

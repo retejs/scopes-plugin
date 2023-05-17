@@ -6,7 +6,7 @@ import { Position } from '../../types'
 import { AgentContext, AgentParams, ScopeAgent } from '../types'
 
 export type DefaultScopesAgentParams = AgentParams & {
-    timeout?: number
+  timeout?: number
 }
 
 export const useScopeAgent: ScopeAgent = (params: DefaultScopesAgentParams, { area, editor, scopes }) => {
