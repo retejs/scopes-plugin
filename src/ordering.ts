@@ -24,11 +24,6 @@ function bringConnectionBack<T>(id: ConnectionId, props: Props<T>) {
 
 function bringForward<T>(nodeId: NodeId, props: Props<T>) {
   const view = props.area.nodeViews.get(nodeId)
-
-  if (view) {
-    props.area.area.content.reorder(view.element, null)
-  }
-
   const connections = props.editor.getConnections().filter(c => {
     return nodeId === c.source || nodeId === c.target
   })
@@ -37,6 +32,11 @@ function bringForward<T>(nodeId: NodeId, props: Props<T>) {
   })
 
   connections.forEach(connection => bringConnectionForward(connection.id, props))
+
+  if (view) {
+    props.area.area.content.reorder(view.element, null)
+  }
+
   children.forEach(child => bringForward(child.id, props))
 }
 
