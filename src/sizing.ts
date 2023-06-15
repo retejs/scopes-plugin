@@ -50,10 +50,18 @@ export function updateNodeSizes<T>(node: ExpectedScheme['Node'], size: Size, { a
 // eslint-disable-next-line max-statements
 export async function resizeParent<T>(parent: ExpectedScheme['Node'], agentParams: AgentParams, props: Props<T>) {
   const { id } = parent
+  const children = props.editor.getNodes()
+    .filter(child => child.parent === id)
+    .filter(node => !agentParams.exclude(node.id))
   const padding = agentParams.padding(id)
 
   if (children.length === 0) {
-    updateNodeSizes(parent, { width: 220, height: 120 }, props)
+    const size = agentParams.size(id, {
+      width: padding.left + padding.right,
+      height: padding.top + padding.bottom
+    })
+
+    updateNodeSizes(parent, size, props)
   } else {
     const { top, left, width, height } = getNodesBoundingBox(children, props)
 
@@ -62,7 +70,7 @@ export async function resizeParent<T>(parent: ExpectedScheme['Node'], agentParam
     const outerTop = top - padding.top
     const outerLeft = left - padding.left
 
-    updateNodeSizes(parent, { width: outerWidth, height: outerHeight }, props)
+    updateNodeSizes(parent, agentParams.size(id, { width: outerWidth, height: outerHeight }), props)
     await agentParams.translate(parent.id, outerLeft, outerTop)
   }
   if (parent.parent) {

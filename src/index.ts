@@ -5,7 +5,7 @@ import { useOrdering } from './ordering'
 import { Preset } from './presets/types'
 import { translateChildren } from './scope'
 import { resizeParent } from './sizing'
-import { ExpectedScheme, Padding } from './types'
+import { ExpectedScheme, Padding, Size } from './types'
 import { belongsTo, hasSelectedParent, trackedTranslate } from './utils'
 import { useValidator } from './validation'
 
@@ -14,6 +14,7 @@ export * as Presets from './presets'
 type Props = {
   padding?: (id: NodeId) => Padding
   exclude?: (id: NodeId) => boolean
+  size?: (id: NodeId, size: Size) => Size
 }
 
 type Requires<Schemes extends ExpectedScheme> =
@@ -25,11 +26,13 @@ export type Scopes =
 
 export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Scope<Scopes, [Requires<Schemes>, Root<Schemes>]> {
   padding: (id: NodeId) => Padding
+  exclude: (id: NodeId) => boolean
+  size: (id: NodeId, size: Size) => Size
   editor!: NodeEditor<Schemes>
   area!: BaseAreaPlugin<Schemes, T>
   presets: Preset[] = []
 
-  constructor(private props?: Props) {
+  constructor(props?: Props) {
     super('scopes')
     this.padding = props?.padding || (() => ({
       top: 40,
@@ -38,6 +41,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
       bottom: 20
     }))
     this.exclude = props?.exclude || (() => false)
+    this.size = props?.size || ((id, size) => size)
   }
 
   // eslint-disable-next-line max-statements
@@ -48,10 +52,10 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     this.editor = this.area.parentScope<NodeEditor<Schemes>>(NodeEditor)
 
     const props = { editor: this.editor, area: this.area }
-    const { padding, exclude } = this
+    const { padding, size, exclude } = this
     const pickedNodes = getPickedNodes(this)
     const { translate, isTranslating } = trackedTranslate(props)
-    const agentParams = { padding, exclude, translate }
+    const agentParams = { padding, size, exclude, translate }
 
     useValidator(props)
     useOrdering(props)
