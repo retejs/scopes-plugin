@@ -1,8 +1,8 @@
 import { NodeEditor } from 'rete'
 import { BaseAreaPlugin } from 'rete-area-plugin'
 
-import { ExpectedScheme, Padding } from './types'
-import { Translate } from './utils'
+import { AgentParams } from './agents/types'
+import { ExpectedScheme } from './types'
 
 type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<ExpectedScheme, T> }
 
@@ -48,8 +48,9 @@ export function updateNodeSizes<T>(node: ExpectedScheme['Node'], size: Size, { a
 }
 
 // eslint-disable-next-line max-statements
-export async function resizeParent<T>(parent: ExpectedScheme['Node'], padding: Padding, translate: Translate, props: Props<T>) {
-  const children = props.editor.getNodes().filter(child => child.parent === parent.id)
+export async function resizeParent<T>(parent: ExpectedScheme['Node'], agentParams: AgentParams, props: Props<T>) {
+  const { id } = parent
+  const padding = agentParams.padding(id)
 
   if (children.length === 0) {
     updateNodeSizes(parent, { width: 220, height: 120 }, props)
@@ -62,13 +63,13 @@ export async function resizeParent<T>(parent: ExpectedScheme['Node'], padding: P
     const outerLeft = left - padding.left
 
     updateNodeSizes(parent, { width: outerWidth, height: outerHeight }, props)
-    await translate(parent.id, outerLeft, outerTop)
+    await agentParams.translate(parent.id, outerLeft, outerTop)
   }
   if (parent.parent) {
     const parentsParent = props.editor.getNode(parent.parent)
 
     if (parentsParent) {
-      await resizeParent(parentsParent, padding, translate, props)
+      await resizeParent(parentsParent, agentParams, props)
     }
   }
 }

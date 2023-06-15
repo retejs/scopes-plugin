@@ -1,4 +1,4 @@
-import { NodeEditor, Root, Scope } from 'rete'
+import { NodeEditor, NodeId, Root, Scope } from 'rete'
 import { BaseArea, BaseAreaPlugin } from 'rete-area-plugin'
 
 import { Scopes } from '..'

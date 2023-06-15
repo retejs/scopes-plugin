@@ -1,14 +1,14 @@
 import { NodeEditor, NodeId } from 'rete'
 import { BaseAreaPlugin } from 'rete-area-plugin'
 
+import { AgentParams } from './agents/types'
 import { resizeParent } from './sizing'
-import { ExpectedScheme, Padding, Position } from './types'
-import { Translate } from './utils'
+import { ExpectedScheme, Position } from './types'
 
 type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<ExpectedScheme, T> }
 
 // eslint-disable-next-line max-statements, max-len
-export async function reassignParent<T>(ids: NodeId[], pointer: { x: number, y: number }, padding: Padding, translate: Translate, props: Props<T>) {
+export async function reassignParent<T>(ids: NodeId[], pointer: { x: number, y: number }, agentParams: AgentParams, props: Props<T>) {
   if (!ids.length) return
   const nodes = ids
     .map(id => props.editor.getNode(id))
@@ -53,11 +53,11 @@ export async function reassignParent<T>(ids: NodeId[], pointer: { x: number, y: 
   nodes.forEach(node => node.parent = undefined)
   if (topOverlayParent) {
     nodes.forEach(node => node.parent = topOverlayParent.node.id)
-    await resizeParent(topOverlayParent.node, padding, translate, props)
+    await resizeParent(topOverlayParent.node, agentParams, props)
   }
 
   for (const formerParent of formerParents) {
-    await resizeParent(formerParent, padding, translate, props)
+    await resizeParent(formerParent, agentParams, props)
   }
 }
 

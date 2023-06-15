@@ -56,7 +56,7 @@ export const useScopeAgent: ScopeAgent = (params: DefaultScopesAgentParams, { ar
       const { pointer } = area.area
       const ids = release()
 
-      await reassignParent(ids, pointer, params.padding, params.translate, { area, editor })
+      await reassignParent(ids, pointer, params, { area, editor })
     }
     return context
   })

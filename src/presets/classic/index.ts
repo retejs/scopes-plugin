@@ -2,8 +2,8 @@ import { classic } from '../../agents'
 import { Preset } from '../types'
 
 export function setup(): Preset {
-  return ({ padding, translate }, context) => {
-    classic.useScopeAgent({ padding, translate }, context)
+  return (params, context) => {
+    classic.useScopeAgent(params, context)
     classic.useVisualEffects(context)
   }
 }

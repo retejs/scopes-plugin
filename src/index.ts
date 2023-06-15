@@ -12,7 +12,7 @@ import { useValidator } from './validation'
 export * as Presets from './presets'
 
 type Props = {
-  padding?: Padding
+  padding?: (id: NodeId) => Padding
 }
 
 type Requires<Schemes extends ExpectedScheme> =
@@ -23,19 +23,19 @@ export type Scopes =
   | { type: 'scopereleased', data: { ids: NodeId[] } }
 
 export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Scope<Scopes, [Requires<Schemes>, Root<Schemes>]> {
-  padding: Padding
+  padding: (id: NodeId) => Padding
   editor!: NodeEditor<Schemes>
   area!: BaseAreaPlugin<Schemes, T>
   presets: Preset[] = []
 
   constructor(private props?: Props) {
     super('scopes')
-    this.padding = props?.padding || {
+    this.padding = props?.padding || (() => ({
       top: 40,
       left: 20,
       right: 20,
       bottom: 20
-    }
+    }))
   }
 
   // eslint-disable-next-line max-statements
@@ -49,12 +49,13 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     const { padding } = this
     const pickedNodes = getPickedNodes(this)
     const { translate, isTranslating } = trackedTranslate(props)
+    const agentParams = { padding, translate }
 
     useValidator(props)
     useOrdering(props)
 
     this.presets.forEach(preset => {
-      preset({ padding, translate }, { ...props, scopes: this })
+      preset(agentParams, { ...props, scopes: this })
     })
 
     // eslint-disable-next-line max-statements, complexity
@@ -77,7 +78,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
           const isPicked = belongsTo(current.id, pickedNodes, props)
 
           if (!hasAnySelectedParent && !isPicked) {
-            await resizeParent(parent, padding, translate, props)
+            await resizeParent(parent, agentParams, props)
           }
         }
       }
@@ -86,7 +87,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
         const parent = parentId && props.editor.getNode(parentId)
 
         if (parent) {
-          await resizeParent(parent, padding, translate, props)
+          await resizeParent(parent, agentParams, props)
         }
       }
       return context
