@@ -13,6 +13,7 @@ export * as Presets from './presets'
 
 type Props = {
   padding?: (id: NodeId) => Padding
+  exclude?: (id: NodeId) => boolean
 }
 
 type Requires<Schemes extends ExpectedScheme> =
@@ -36,6 +37,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
       right: 20,
       bottom: 20
     }))
+    this.exclude = props?.exclude || (() => false)
   }
 
   // eslint-disable-next-line max-statements
@@ -46,10 +48,10 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     this.editor = this.area.parentScope<NodeEditor<Schemes>>(NodeEditor)
 
     const props = { editor: this.editor, area: this.area }
-    const { padding } = this
+    const { padding, exclude } = this
     const pickedNodes = getPickedNodes(this)
     const { translate, isTranslating } = trackedTranslate(props)
-    const agentParams = { padding, translate }
+    const agentParams = { padding, exclude, translate }
 
     useValidator(props)
     useOrdering(props)
@@ -73,7 +75,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
 
         const parent = current.parent ? props.editor.getNode(current.parent) : null
 
-        if (parent) {
+        if (parent && !agentParams.exclude(id)) {
           const hasAnySelectedParent = hasSelectedParent(id, props)
           const isPicked = belongsTo(current.id, pickedNodes, props)
 
