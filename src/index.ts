@@ -33,6 +33,7 @@ type Requires<Schemes extends ExpectedScheme> =
 export type Scopes =
   | { type: 'scopepicked', data: { ids: NodeId[] } }
   | { type: 'scopereleased', data: { ids: NodeId[] } }
+  | { type: 'scopeupdated', data: { id: NodeId } }
 
 /**
  * Scope plugin. Responsible for user interaction with scopes (nested nodes, groups)
@@ -114,6 +115,13 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
           await resizeParent(parent, agentParams, props)
         }
       }
+      if (context.type === 'scopeupdated') {
+        const parent = this.editor.getNode(context.data.id)
+
+        if (parent) {
+          await resizeParent(parent, agentParams, props)
+        }
+      }
       return context
     })
   }
@@ -131,6 +139,10 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     const node = this.editor.getNode(id)
 
     return node && (node.selected || hasSelectedParent(id, props))
+  }
+
+  public async update(scopeId: NodeId) {
+    await this.emit({ type: 'scopeupdated', data: { id: scopeId } })
   }
 }
 
