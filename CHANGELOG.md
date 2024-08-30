@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/retejs/scopes-plugin/compare/v2.1.0...v2.1.1) (2024-08-30)
+
+
+### Bug Fixes
+
+* update cli and fix linting errors ([7ff45bc](https://github.com/retejs/scopes-plugin/commit/7ff45bcac4b949f6df439ce707aace0853a8b010))
+
 # [2.1.0](https://github.com/retejs/scopes-plugin/compare/v2.0.1...v2.1.0) (2024-06-01)
 
 
