@@ -44,7 +44,7 @@ export function updateNodeSizes<T>(node: ExpectedScheme['Node'], size: Size, { a
   node.width = width
   node.height = height
 
-  area.resize(node.id, width, height)
+  void area.resize(node.id, width, height)
 }
 
 // eslint-disable-next-line max-statements
