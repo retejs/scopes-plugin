@@ -31,19 +31,22 @@ function bringForward<T>(nodeId: NodeId, props: Props<T>) {
     return n.parent === nodeId
   })
 
-  connections.forEach(connection => bringConnectionForward(connection.id, props))
+  connections.forEach(connection => {
+    bringConnectionForward(connection.id, props)
+  })
 
   if (view) {
     props.area.area.content.reorder(view.element, null)
   }
 
-  children.forEach(child => bringForward(child.id, props))
+  children.forEach(child => {
+    bringForward(child.id, props)
+  })
 }
 
 export function useOrdering<T>(props: Props<T>) {
-  // eslint-disable-next-line max-statements
-  props.area.addPipe(async context => {
-    if (!('type' in context)) return context
+  props.area.addPipe(context => {
+    if (!context || typeof context !== 'object' || !('type' in context)) return context
     if (context.type === 'nodepicked') {
       bringForward(context.data.id, props)
     }

@@ -25,10 +25,12 @@ export const useScopeAgent: ScopeAgent = (params: DefaultScopesAgentParams, { ar
   function pick(id: NodeId) {
     const timeoutId = window.setTimeout(() => {
       const selected = editor.getNodes().filter(n => n.selected)
-      const targets = selected.length ? selected.map(n => n.id) : [id]
+      const targets = selected.length
+        ? selected.map(n => n.id)
+        : [id]
 
       candidates.push(...targets)
-      scopes.emit({ type: 'scopepicked', data: { ids: targets } })
+      void scopes.emit({ type: 'scopepicked', data: { ids: targets } })
     }, timeout)
 
     picked = { timeout: timeoutId }
@@ -39,13 +41,13 @@ export const useScopeAgent: ScopeAgent = (params: DefaultScopesAgentParams, { ar
     cancel()
     candidates = []
 
-    scopes.emit({ type: 'scopereleased', data: { ids: list } })
+    void scopes.emit({ type: 'scopereleased', data: { ids: list } })
 
     return list
   }
 
   area.addPipe(async context => {
-    if (!('type' in context)) return context
+    if (!context || typeof context !== 'object' || !('type' in context)) return context
     if (context.type === 'nodepicked') {
       pick(context.data.id)
     }
@@ -103,26 +105,28 @@ export function useVisualEffects<T>({ area, editor, scopes }: AgentContext<T>): 
       }
     }
   }
-  // eslint-disable-next-line max-statements
+
   scopes.addPipe(context => {
     if (context.type === 'scopepicked') {
       const { ids } = context.data
 
-      editor.getNodes().filter(n => !ids.includes(n.id)).forEach(node => {
-        const view = area.nodeViews.get(node.id)
+      editor.getNodes().filter(n => !ids.includes(n.id))
+        .forEach(node => {
+          const view = area.nodeViews.get(node.id)
 
-        if (view) view.element.style.opacity = '0.4'
-      })
+          if (view) view.element.style.opacity = '0.4'
+        })
       if (clientPointerPostion) updateHighlightedScopes(clientPointerPostion, pickedNodes)
     }
     if (context.type === 'scopereleased') {
       const { ids } = context.data
 
-      editor.getNodes().filter(n => !ids.includes(n.id)).forEach(node => {
-        const view = area.nodeViews.get(node.id)
+      editor.getNodes().filter(n => !ids.includes(n.id))
+        .forEach(node => {
+          const view = area.nodeViews.get(node.id)
 
-        if (view) view.element.style.opacity = ''
-      })
+          if (view) view.element.style.opacity = ''
+        })
       if (clientPointerPostion) updateHighlightedScopes(clientPointerPostion, pickedNodes)
     }
     if (context.type === 'pointermove') {

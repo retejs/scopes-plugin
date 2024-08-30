@@ -9,7 +9,6 @@ type Props<T> = { editor: NodeEditor<ExpectedScheme>, area: BaseAreaPlugin<Expec
 export function useValidator<T>(props: Props<T>) {
   const isClearing = watchClearing(props.editor)
 
-  // eslint-disable-next-line max-statements
   props.area.addPipe(context => {
     if (!context || !(typeof context === 'object' && 'type' in context)) return context
     if (context.type === 'nodecreate') {

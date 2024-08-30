@@ -37,12 +37,12 @@ export type Translate = (nodeId: string, x: number, y: number) => Promise<void>
  * keep track of currently moving nodes (to prevent infinite loop)
  */
 export function trackedTranslate<T>(props: Props<T>): {
-  translate: Translate,
+  translate: Translate
   isTranslating: (id: NodeId) => boolean
 } {
   const active = new Map<NodeId, number>()
-  const increment = (id: NodeId) => active.set(id, (active.get(id) || 0) + 1)
-  const decrement = (id: NodeId) => active.set(id, (active.get(id) || 0) - 1)
+  const increment = (id: NodeId) => active.set(id, (active.get(id) ?? 0) + 1)
+  const decrement = (id: NodeId) => active.set(id, (active.get(id) ?? 0) - 1)
 
   return {
     async translate(id, x, y) {
@@ -59,7 +59,7 @@ export function trackedTranslate<T>(props: Props<T>): {
       }
     },
     isTranslating(id) {
-      return (active.get(id) || 0) > 0
+      return (active.get(id) ?? 0) > 0
     }
   }
 }

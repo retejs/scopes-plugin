@@ -21,7 +21,8 @@ export async function reassignParent<T>(ids: NodeId[], pointer: { x: number, y: 
       if (!view) throw new Error('node view')
 
       return { node, view }
-    }).filter(({ node, view }) => {
+    })
+    .filter(({ node, view }) => {
       return !ids.includes(node.id)
         && pointer.x > view.position.x
         && pointer.y > view.position.y

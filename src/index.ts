@@ -63,7 +63,6 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
     this.size = props?.size || ((id, size) => size)
   }
 
-  // eslint-disable-next-line max-statements
   setParent(scope: Scope<BaseArea<Schemes>, [Root<Schemes>]>): void {
     super.setParent(scope)
 
@@ -90,13 +89,17 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
         const current = props.editor.getNode(id)
 
         if (!current) throw new Error('cannot find node')
-        // prevent translating children if the node translation
-        // is triggered by its resizing (when its children moved)
+        /*
+         * prevent translating children if the node translation
+         * is triggered by its resizing (when its children moved)
+         */
         if (!isTranslating(id)) {
           await translateChildren(id, context.data, props)
         }
 
-        const parent = current.parent ? props.editor.getNode(current.parent) : null
+        const parent = current.parent
+          ? props.editor.getNode(current.parent)
+          : null
 
         if (parent && !agentParams.exclude(id)) {
           const hasAnySelectedParent = hasSelectedParent(id, props)
@@ -149,7 +152,7 @@ export class ScopesPlugin<Schemes extends ExpectedScheme, T = never> extends Sco
 export function getPickedNodes<S extends ExpectedScheme>(scopes: Scope<Scopes, [Requires<S>, Root<S>]>) {
   const nodes: NodeId[] = []
 
-  scopes.addPipe(async context => {
+  scopes.addPipe(context => {
     if (!('type' in context)) return context
     if (context.type === 'scopepicked') {
       nodes.push(...context.data.ids)

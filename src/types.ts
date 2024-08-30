@@ -1,9 +1,9 @@
 import { ConnectionBase, GetSchemes, NodeBase, NodeId } from 'rete'
 
 export type Padding = {
-  top: number,
-  left: number,
-  right: number,
+  top: number
+  left: number
+  right: number
   bottom: number
 }
 
